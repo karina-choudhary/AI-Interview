@@ -1,0 +1,750 @@
+/* ===========================
+   NAVBAR
+=========================== */
+
+.navbar{
+
+    position:sticky;
+
+    top:0;
+
+    z-index:1000;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:18px 40px;
+
+    background:rgba(255,255,255,.75);
+
+    backdrop-filter:blur(18px);
+
+    border-bottom:1px solid rgba(255,255,255,.6);
+
+    box-shadow:0 8px 25px rgba(0,0,0,.05);
+
+}
+
+/* ===========================
+   LOGO
+=========================== */
+
+.navbar-logo a{
+
+    text-decoration:none;
+
+    font-size:26px;
+
+    font-weight:700;
+
+    color:#1e293b;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+}
+
+.navbar-logo span{
+
+    font-size:30px;
+
+}
+
+/* ===========================
+   RIGHT
+=========================== */
+
+.navbar-right{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:18px;
+
+}
+
+/* ===========================
+   PROFILE BUTTON
+=========================== */
+
+.profile-btn{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    text-decoration:none;
+
+    color:#475569;
+
+    padding:12px 20px;
+
+    border-radius:14px;
+
+    transition:.3s;
+
+    background:white;
+
+    border:1px solid #e5e7eb;
+
+}
+
+.profile-btn:hover{
+
+    background:#6366f1;
+
+    color:white;
+
+    transform:translateY(-3px);
+
+    box-shadow:0 10px 20px rgba(99,102,241,.25);
+
+}
+
+.profile-btn svg{
+
+    font-size:20px;
+
+}
+
+/* ===========================
+   LOGOUT BUTTON
+=========================== */
+
+.logout-btn{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    border:none;
+
+    cursor:pointer;
+
+    padding:12px 22px;
+
+    border-radius:14px;
+
+    background:#6366f1;
+
+    color:white;
+
+    font-size:15px;
+
+    font-weight:600;
+
+    transition:.3s;
+
+}
+
+.logout-btn:hover{
+
+    background:#4f46e5;
+
+    transform:translateY(-3px);
+
+    box-shadow:0 12px 25px rgba(99,102,241,.3);
+
+}
+
+.logout-btn svg{
+
+    font-size:18px;
+
+}
+
+/* ===========================
+   RESPONSIVE
+=========================== */
+
+@media(max-width:768px){
+
+.navbar{
+
+    padding:15px 20px;
+
+    flex-direction:column;
+
+    gap:18px;
+
+}
+
+.navbar-right{
+
+    width:100%;
+
+    justify-content:center;
+
+    flex-wrap:wrap;
+
+}
+
+.profile-btn,
+.logout-btn{
+
+    flex:1;
+
+    justify-content:center;
+
+}
+
+}
+
+@media(max-width:480px){
+
+.navbar-logo a{
+
+    font-size:22px;
+
+}
+
+.navbar-logo span{
+
+    font-size:26px;
+
+}
+
+.profile-btn span{
+
+    display:none;
+
+}
+
+.logout-btn{
+
+    padding:12px 16px;
+
+}
+
+}
+/* ===========================
+   FOOTER
+=========================== */
+
+.footer{
+
+    margin-top:60px;
+
+    padding:35px 20px;
+
+    text-align:center;
+
+    background:rgba(255,255,255,.75);
+
+    backdrop-filter:blur(18px);
+
+    border-top:1px solid rgba(255,255,255,.6);
+
+    box-shadow:0 -5px 20px rgba(0,0,0,.05);
+
+}
+
+.footer h3{
+
+    color:#1e293b;
+
+    margin-bottom:12px;
+
+    font-size:24px;
+
+}
+
+.footer p{
+
+    color:#64748b;
+
+    margin-bottom:12px;
+
+    line-height:1.7;
+
+}
+
+.footer span{
+
+    color:#94a3b8;
+
+    font-size:14px;
+
+}
+
+@media(max-width:768px){
+
+.footer{
+
+    margin-top:40px;
+
+    padding:25px 15px;
+
+}
+
+.footer h3{
+
+    font-size:20px;
+
+}
+
+}
+/* ===========================
+   SIDEBAR
+=========================== */
+
+.sidebar{
+
+    position:fixed;
+
+    top:75px;
+
+    left:0;
+
+    width:260px;
+
+    height:calc(100vh - 75px);
+
+    background:rgba(255,255,255,.78);
+
+    backdrop-filter:blur(18px);
+
+    border-right:1px solid rgba(255,255,255,.6);
+
+    box-shadow:8px 0 25px rgba(0,0,0,.05);
+
+    padding:25px 18px;
+
+    overflow-y:auto;
+
+}
+
+/* ===========================
+   LOGO
+=========================== */
+
+.logo{
+
+    font-size:24px;
+
+    font-weight:700;
+
+    color:#1e293b;
+
+    text-align:center;
+
+    margin-bottom:35px;
+
+}
+
+/* ===========================
+   MENU
+=========================== */
+
+.sidebar ul{
+
+    list-style:none;
+
+    padding:0;
+
+    margin:0;
+
+}
+
+.sidebar li{
+
+    margin-bottom:12px;
+
+}
+
+/* ===========================
+   LINK
+=========================== */
+
+.sidebar a{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:14px;
+
+    padding:14px 18px;
+
+    text-decoration:none;
+
+    color:#475569;
+
+    border-radius:16px;
+
+    transition:.3s;
+
+    font-size:16px;
+
+    font-weight:500;
+
+}
+
+/* ICON */
+
+.sidebar a svg{
+
+    font-size:20px;
+
+}
+
+/* HOVER */
+
+.sidebar a:hover{
+
+    background:#eef2ff;
+
+    color:#4f46e5;
+
+    transform:translateX(6px);
+
+}
+
+/* ACTIVE */
+
+.sidebar a.active{
+
+    background:linear-gradient(135deg,#6366f1,#7c3aed);
+
+    color:white;
+
+    box-shadow:0 12px 25px rgba(99,102,241,.30);
+
+}
+
+.sidebar a.active svg{
+
+    color:white;
+
+}
+
+/* SCROLLBAR */
+
+.sidebar::-webkit-scrollbar{
+
+    width:6px;
+
+}
+
+.sidebar::-webkit-scrollbar-thumb{
+
+    background:#c7d2fe;
+
+    border-radius:20px;
+
+}
+
+.sidebar::-webkit-scrollbar-track{
+
+    background:transparent;
+
+}
+
+/* ===========================
+   RESPONSIVE
+=========================== */
+
+@media(max-width:992px){
+
+.sidebar{
+
+    width:220px;
+
+}
+
+}
+
+@media(max-width:768px){
+
+.sidebar{
+
+    position:fixed;
+
+    left:-260px;
+
+    transition:.35s;
+
+    z-index:1200;
+
+}
+
+.sidebar.show{
+
+    left:0;
+
+}
+
+}
+
+@media(max-width:480px){
+
+.sidebar{
+
+    width:240px;
+
+}
+
+.logo{
+
+    font-size:22px;
+
+}
+
+.sidebar a{
+
+    font-size:15px;
+
+    padding:12px 15px;
+
+}
+
+}.layout{
+    display:flex;
+    flex-direction:column;
+    min-height:100vh;
+    background:#f5f7ff;
+}
+
+.layout-body{
+    display:flex;
+    flex:1;
+}
+
+.main-content{
+    flex:1;
+    margin-left:260px;
+    padding:35px;
+    min-height:calc(100vh - 140px);
+}
+/* ==========================================
+            GLOBAL RESPONSIVE
+========================================== */
+
+@media (max-width:992px){
+
+/* Layout */
+
+.main-content{
+    margin-left:220px;
+    padding:25px;
+}
+
+/* Sidebar */
+
+.sidebar{
+    width:220px;
+}
+
+/* Navbar */
+
+.navbar{
+    padding:15px 25px;
+}
+
+/* Footer */
+
+.footer{
+    padding:25px;
+}
+
+}
+
+@media (max-width:768px){
+
+/* Layout */
+
+.layout-body{
+    display:block;
+}
+
+.main-content{
+    margin-left:0;
+    padding:20px;
+}
+
+/* Navbar */
+
+.navbar{
+    flex-direction:column;
+    gap:15px;
+    padding:15px;
+}
+
+.navbar-right{
+    width:100%;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:10px;
+}
+
+.profile-btn,
+.logout-btn{
+    width:100%;
+    justify-content:center;
+}
+
+/* Sidebar */
+
+.sidebar{
+    position:fixed;
+    top:75px;
+    left:-260px;
+    width:250px;
+    height:calc(100vh - 75px);
+    transition:.35s;
+    z-index:1200;
+}
+
+.sidebar.show{
+    left:0;
+}
+
+/* Footer */
+
+.footer{
+    margin-top:40px;
+    padding:25px 15px;
+}
+
+.footer h3{
+    font-size:20px;
+}
+
+.footer p{
+    font-size:15px;
+}
+
+}
+
+@media (max-width:480px){
+
+/* Main */
+
+.main-content{
+    padding:15px;
+}
+
+/* Navbar */
+
+.navbar-logo a{
+    font-size:20px;
+}
+
+.navbar-logo span{
+    font-size:24px;
+}
+
+.profile-btn span{
+    display:none;
+}
+
+.logout-btn{
+    padding:12px 15px;
+    font-size:14px;
+}
+
+/* Sidebar */
+
+.sidebar{
+    width:230px;
+}
+
+.logo{
+    font-size:20px;
+}
+
+.sidebar a{
+    font-size:15px;
+    padding:12px 15px;
+}
+
+/* Footer */
+
+.footer{
+    padding:20px 12px;
+}
+
+.footer h3{
+    font-size:18px;
+}
+
+.footer p{
+    font-size:14px;
+}
+
+.footer span{
+    font-size:12px;
+}
+
+}
+/* ---------- DESKTOP DEFAULT ---------- */
+
+/* Hamburger Button Desktop par hidden rahega */
+.menu-btn{
+display:none;
+background:none;
+border:none;
+font-size:24px;
+cursor:pointer;
+color:#6366f1;
+}
+
+/* Close Button Desktop par hidden rahega */
+.close-btn{
+display:none;
+background:none;
+border:none;
+font-size:24px;
+cursor:pointer;
+margin-bottom:20px;
+color:#6366f1;
+}
+
+/* ---------- MOBILE RESPONSIVE (max-width: 768px) ---------- */
+
+@media(max-width:768px){
+
+  /* Buttons ko mobile par active kiya */
+  .menu-btn{
+    display:block;
+  }
+
+  .close-btn{
+    display:block;
+    /* Sidebar ke top-right corner me set karne ke liye */
+    position: absolute;
+    top: 20px;
+    right: 20px;
+  }
+
+  /* FIX: Sidebar ko pehle screen se left side bahar chhupaya */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 260px;
+    height: 100vh;
+    background: white;
+    z-index: 1000;
+    box-shadow: 5px 0 25px rgba(0,0,0,0.1);
+    transform: translateX(-100%); /* Screen se bahar */
+    transition: transform 0.3s ease-in-out; /* Smooth open/close effect */
+  }
+
+  /* FIX: Jab state true hogi tab sidebar smooth screen ke andar aayega */
+  .sidebar.show {
+    transform: translateX(0); /* Screen ke andar */
+  }
+
+}

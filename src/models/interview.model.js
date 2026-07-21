@@ -15,14 +15,27 @@ const interviewSchema = new mongoose.Schema(
     ],
 
     answers: [
-      {
-        questionId: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Question",
-        },
-        answer: String,
-      },
-    ],
+  {
+    questionId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Question",
+    },
+
+    answer: {
+      type: String,
+    },
+
+    score: {
+      type: Number,
+      default: 0,
+    },
+
+    feedback: {
+      type: String,
+      default: "",
+    },
+  },
+],
 
     score: {
       type: Number,
