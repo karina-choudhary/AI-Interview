@@ -35,7 +35,7 @@ export default function Interview() {
 
       const response = await axios.get(
 
-        "http://localhost:5000/api/resume",
+        "https://ai-interview-a2kn.onrender.com/api/resume",
 
         {
 
@@ -99,7 +99,7 @@ export default function Interview() {
 
       const response = await axios.post(
 
-        "http://localhost:5000/api/interview/start",
+        "https://ai-interview-a2kn.onrender.com/api/interview/start",
 
         {
 

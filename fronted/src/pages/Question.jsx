@@ -26,7 +26,7 @@ function Question() {
   const fetchInterview = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/interview/${id}`,
+        `https://ai-interview-a2kn.onrender.com/api/interview/${id}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -81,7 +81,7 @@ function Question() {
   const submitAnswer = async () => {
     try {
       await axios.post(
-        `http://localhost:5000/api/interview/${id}/submit`,
+        `https://ai-interview-a2kn.onrender.com/api/interview/${id}/submit`,
         {
           questionId: questions[currentQuestion]._id,
           answer,

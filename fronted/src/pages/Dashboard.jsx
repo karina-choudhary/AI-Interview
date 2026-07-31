@@ -16,7 +16,7 @@ function Dashboard() {
 const fetchDashboardStats = async () => {
   try {
     const response = await axios.get(
-      "http://localhost:5000/api/interview/dashboard-stats",
+      "https://ai-interview-a2kn.onrender.com/api/interview/dashboard-stats",
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,

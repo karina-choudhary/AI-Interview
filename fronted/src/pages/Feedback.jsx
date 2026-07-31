@@ -27,7 +27,7 @@ function InterviewReport() {
   const fetchFeedback = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/interview/${id}`,
+        `https://ai-interview-a2kn.onrender.com/api/interview/${id}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,

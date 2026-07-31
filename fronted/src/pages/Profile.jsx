@@ -21,7 +21,7 @@ function Profile() {
   const fetchProfile = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:5000/api/user/profile",
+        "https://ai-interview-a2kn.onrender.com/api/user/profile",
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -54,7 +54,7 @@ function Profile() {
       setLoading(true);
 
       const response = await axios.put(
-        "http://localhost:5000/api/user/profile",
+        "https://ai-interview-a2kn.onrender.com/api/user/profile",
         {
           profileImage: profile.profileImage,
           bio: profile.bio,

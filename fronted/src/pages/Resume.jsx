@@ -33,7 +33,7 @@ export default function Resume() {
 
     try {
       const response = await axios.get(
-        "http://localhost:5000/api/resume",
+        "https://ai-interview-a2kn.onrender.com/api/resume",
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -67,7 +67,7 @@ export default function Resume() {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/resume/upload",
+        "https://ai-interview-a2kn.onrender.com/api/resume/upload",
         formData,
         {
           headers: {
@@ -102,7 +102,7 @@ export default function Resume() {
     if (!confirmDelete) return;
 
     try {
-      await axios.delete(`http://localhost:5000/api/resume/${id}`, {
+      await axios.delete(`https://ai-interview-a2kn.onrender.com/api/resume/${id}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -273,7 +273,7 @@ export default function Resume() {
 
                 onClick={() =>
                   window.open(
-                    `http://localhost:5000/${resume.path.replace(
+                    `https://ai-interview-a2kn.onrender.com/${resume.path.replace(
                       /\\/g,
                       "/"
                     )}`,
