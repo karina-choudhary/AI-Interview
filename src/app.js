@@ -13,7 +13,8 @@ const app = express();
 
 // 1. Global Middlewares
 app.use(cors({
-    origin: "http://localhost:5173", 
+    origin:[ "http://localhost:5173",
+   "https://fronted-cuqmpmo7j-karinakarina-choudhary-s-projects.vercel.app"], 
     credentials: true,
 }));
 app.use(express.json());
