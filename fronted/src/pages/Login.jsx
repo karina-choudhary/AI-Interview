@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 // import "./Login.css";
+const API_URL = import.meta.env.VITE_API_URL;
 
 const Login = () => {
   const navigate = useNavigate();
@@ -27,7 +28,7 @@ const Login = () => {
     setMessage("");
 
     try {
-      const res = await fetch("https://ai-interview-a2kn.onrender.com/api/auth/login", {
+      const res = await fetch(`${API_URL}/api/auth/login`,  {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
