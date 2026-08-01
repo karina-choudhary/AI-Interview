@@ -36,13 +36,16 @@ const register = async (req, res) => {
     });
   }
 };
-
-const login = async (req, res) => {
+    const login = async (req, res) => {
   try {
-
     const { email, password } = req.body;
 
+    console.log("Request Body:", req.body);
+    console.log("Email Received:", email);
+
     const user = await User.findOne({ email });
+
+    console.log("User Found:", user);
 
     if (!user) {
       return res.status(400).json({
@@ -57,15 +60,11 @@ const login = async (req, res) => {
         message: "Invalid Password",
       });
     }
-     console.log("JWT_SECRET =", process.env.JWT_SECRET);
+
     const token = jwt.sign(
-      {
-        id: user._id,
-      },
+      { id: user._id },
       process.env.JWT_SECRET,
-      {
-        expiresIn: "7d",
-      }
+      { expiresIn: "7d" }
     );
 
     res.status(200).json({
@@ -74,11 +73,15 @@ const login = async (req, res) => {
     });
 
   } catch (error) {
+    console.log(error);
     res.status(500).json({
       message: error.message,
     });
   }
-};  const profile = (req, res) => {
+};
+
+  
+  const profile = (req, res) => {
   res.status(200).json({
     message: "Welcome to your profile",
     user: req.user,
