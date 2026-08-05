@@ -1,4 +1,4 @@
-const { GoogleGenAI, Type } = require('@google/genai'); // Type variable ko import kiya
+const { GoogleGenAI } = require('@google/genai');
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 const evaluateAnswer = async (question, userAnswer, correctAnswer) => {
@@ -15,16 +15,16 @@ Reference Answer: ${correctAnswer}`;
       contents: prompt,
       config: {
         responseMimeType: "application/json",
-        // Direct, bulletproof object assignment using standard native types
+        // Bulletproof lowercase string format supported perfectly by Gemini 2.5 on Vercel
         responseSchema: {
-          type: Type.OBJECT,
+          type: "object",
           properties: {
             score: { 
-              type: Type.INTEGER, 
+              type: "integer", 
               description: "Technical assessment score between 0 and 100." 
             },
             feedback: { 
-              type: Type.STRING, 
+              type: "string", 
               description: "Dynamic, concise technical evaluation and areas of improvement." 
             }
           },
@@ -33,12 +33,10 @@ Reference Answer: ${correctAnswer}`;
       },
     });
 
-    // Safe unified text extractor
+    // 100% Correct array mapping syntax for the @google/genai SDK
     let text = "";
-    if (typeof response.text === "function") {
-      text = await response.text();
-    } else if (response.text) {
-      text = response.text;
+    if (response.text) {
+      text = typeof response.text === "function" ? await response.text() : response.text;
     } else if (response.candidates?.[0]?.content?.parts?.[0]?.text) {
       text = response.candidates[0].content.parts[0].text;
     }
@@ -58,10 +56,10 @@ Reference Answer: ${correctAnswer}`;
     console.error("========== GEMINI INTEGRATION FAULT ==========");
     console.error(error);
     
-    // Fallback message to prevent user UI crashes
+    // Exact error text display formatting to diagnose exactly what broke inside Vercel
     return {
       score: 0,
-      feedback: "AI Evaluation temporary sync pause. Checking server schema connection.",
+      feedback: `CRITICAL INTEGRATION ERROR: ${error.message || "Unknown error context"}`
     };
   }
 };
@@ -69,3 +67,4 @@ Reference Answer: ${correctAnswer}`;
 module.exports = {
   evaluateAnswer,
 };
+
