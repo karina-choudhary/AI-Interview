@@ -11,12 +11,18 @@ const errorMiddleware = require("./utils/errorMiddleware");
 
 const app = express();
 
-// 1. Global Middlewares
+// 1. Global Middlewares (Updated with exact dynamic origins)
 app.use(cors({
-    origin:[ "http://localhost:5173",
-   "https://fronted-cuqmpmo7j-karinakarina-choudhary-s-projects.vercel.app"], 
+    origin: [
+      "http://localhost:5173",
+      "https://fronted-nine.vercel.app", // FIXED: Added your active main domain
+      "https://fronted-cuqmpmo7j-karinakarina-choudhary-s-projects.vercel.app"
+    ], 
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"]
 }));
+
 app.use(express.json());
 
 // 2. Static Files
@@ -35,5 +41,4 @@ app.use("/api/interview", interviewroutes);
 // 4. Central Error Handler (MUST be after routes)
 app.use(errorMiddleware);
 
-// 5. App Export
 module.exports = app;

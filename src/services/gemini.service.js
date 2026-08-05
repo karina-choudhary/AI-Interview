@@ -21,7 +21,6 @@ ${correctAnswer}
 Evaluate the candidate.
 
 Return ONLY valid JSON in this format:
-
 {
   "score": 85,
   "feedback": "Short feedback"
@@ -29,26 +28,34 @@ Return ONLY valid JSON in this format:
 `;
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash", // Correct stable model mapping
+      model: "gemini-2.5-flash",
       contents: prompt,
       config: {
-        responseMimeType: "application/json" // Strict structural enforcement
+        responseMimeType: "application/json" // Core level par JSON force karega
       }
     });
 
-    // FIXED: GoogleGenAI SDK returns text via .text() method, not a plain property
-    const text = response.text ? response.text() : "";
+    let text = response.text ? response.text() : "";
 
     if (!text || !text.trim()) {
-      throw new Error("Received empty text string from Gemini API Client response structure.");
+      throw new Error("Empty response from Gemini API");
     }
 
-    const clean = text
-      .replace(/```json/g, "")
-      .replace(/```/g, "")
-      .trim();
+    // Terminal me check karne ke liye raw text print karein
+    console.log("--- RAW GEMINI RESPONSE ---");
+    console.log(text);
+    console.log("----------------------------");
 
-    const parsedData = JSON.parse(clean);
+    // 100% Safe Extraction: JSON string ko '{' aur '}' ke beech se dhoodh kar nikalna
+    const firstBrace = text.indexOf("{");
+    const lastBrace = text.lastIndexOf("}");
+
+    if (firstBrace === -1 || lastBrace === -1) {
+      throw new Error("Valid JSON structure not found in AI response");
+    }
+
+    const cleanJson = text.substring(firstBrace, lastBrace + 1);
+    const parsedData = JSON.parse(cleanJson);
 
     return {
       score: typeof parsedData.score === "number" ? parsedData.score : 0,
