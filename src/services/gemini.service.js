@@ -3,24 +3,39 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 const evaluateAnswer = async (question, userAnswer, correctAnswer) => {
   try {
+    // Clean Prompt: System instructions and examples are removed to prevent schema conflicts
     const prompt = `You are an expert tech interviewer AI. 
+Evaluate the candidate's answer based on the provided reference solution.
+
 Question: ${question} 
 Candidate Answer: ${userAnswer} 
-Reference Answer: ${correctAnswer} 
-Evaluate the candidate's answer based on the reference solution. 
-Return ONLY a valid single-line stringified JSON object matching this exact schema: 
-{ "score": 85, "feedback": "Write dynamic concise technical evaluation here." }`;
+Reference Answer: ${correctAnswer}`;
 
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
+        // Force the model engine to strictly conform to your payload properties
+        responseSchema: {
+          type: "OBJECT",
+          properties: {
+            score: { 
+              type: "INTEGER", 
+              description: "Technical assessment score between 0 and 100." 
+            },
+            feedback: { 
+              type: "STRING", 
+              description: "Dynamic, concise technical evaluation and areas of improvement." 
+            }
+          },
+          required: ["score", "feedback"]
+        }
       },
     });
 
-    // SDK compatibility handling (Naya code check)
-    let text;
+    // Flexible multi-channel string extraction
+    let text = "";
     if (typeof response.text === "function") {
       text = await response.text();
     } else if (response.text) {
@@ -29,47 +44,23 @@ Return ONLY a valid single-line stringified JSON object matching this exact sche
       text = response.candidates?.[0]?.content?.parts?.[0]?.text || "";
     }
 
-    console.log("========== RAW GEMINI RESPONSE ==========");
-    console.log(text);
-    console.log("=========================================");
-
     if (!text || !text.trim()) {
       throw new Error("Gemini returned empty response.");
     }
 
-    // Remove markdown formatting
-    let sanitizedText = text
-      .replace(/```json/gi, "")
-      .replace(/```/g, "")
-      .trim();
-
-    // Secure boundary extraction
-    const firstBrace = sanitizedText.indexOf("{");
-    const lastBrace = sanitizedText.lastIndexOf("}");
-
-    if (firstBrace === -1 || lastBrace === -1) {
-      throw new Error("JSON object not found in Gemini response.");
-    }
-
-    let jsonText = sanitizedText.slice(firstBrace, lastBrace + 1);
-
-    // Clean invisible non-printable/control characters that cause JSON.parse crashes
-    jsonText = jsonText.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
-
-    console.log("========== PARSED JSON ==========");
-    console.log(jsonText);
-    console.log("=================================");
-
-    const parsedData = JSON.parse(jsonText);
+    // Since the API enforces configuration at the engine level,
+    // the system natively passes clean raw string structures.
+    const parsedData = JSON.parse(text.trim());
 
     return {
-      score: Number(parsedData.score) || 0,
+      score: typeof parsedData.score === "number" ? parsedData.score : Number(parsedData.score) || 0,
       feedback: parsedData.feedback ? String(parsedData.feedback).trim() : "No feedback returned by AI.",
     };
 
   } catch (error) {
-    console.log("========== GEMINI ENGINE FAULT ==========");
+    console.error("========== GEMINI INTEGRATION FAULT ==========");
     console.error(error);
+    
     return {
       score: 0,
       feedback: "AI evaluation failed due to parsing setup. Please review manually.",
