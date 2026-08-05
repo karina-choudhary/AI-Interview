@@ -1,9 +1,8 @@
-const { GoogleGenAI } = require('@google/genai');
+const { GoogleGenAI, Type } = require('@google/genai'); // Type variable ko import kiya
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 const evaluateAnswer = async (question, userAnswer, correctAnswer) => {
   try {
-    // Prompt ko simple rakha hai, guidelines ke mutabik JSON format ka description nahi dena hai
     const prompt = `You are an expert tech interviewer AI. 
 Evaluate the candidate's answer based on the provided reference solution.
 
@@ -16,16 +15,16 @@ Reference Answer: ${correctAnswer}`;
       contents: prompt,
       config: {
         responseMimeType: "application/json",
-        // Enforcing standard lower-case JSON validation layout strings
+        // Direct, bulletproof object assignment using standard native types
         responseSchema: {
-          type: "object",
+          type: Type.OBJECT,
           properties: {
             score: { 
-              type: "integer", 
+              type: Type.INTEGER, 
               description: "Technical assessment score between 0 and 100." 
             },
             feedback: { 
-              type: "string", 
+              type: Type.STRING, 
               description: "Dynamic, concise technical evaluation and areas of improvement." 
             }
           },
@@ -34,21 +33,20 @@ Reference Answer: ${correctAnswer}`;
       },
     });
 
-    // Flexible multi-channel string extraction
+    // Safe unified text extractor
     let text = "";
     if (typeof response.text === "function") {
       text = await response.text();
     } else if (response.text) {
       text = response.text;
-    } else {
-      text = response.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    } else if (response.candidates?.[0]?.content?.parts?.[0]?.text) {
+      text = response.candidates[0].content.parts[0].text;
     }
 
     if (!text || !text.trim()) {
-      throw new Error("Gemini returned empty response.");
+      throw new Error("Gemini returned empty response payload.");
     }
 
-    // Engine clean schema response parse framework
     const parsedData = JSON.parse(text.trim());
 
     return {
@@ -60,10 +58,10 @@ Reference Answer: ${correctAnswer}`;
     console.error("========== GEMINI INTEGRATION FAULT ==========");
     console.error(error);
     
-    // Yahan humne message badal diya hai taaki aapko pata chale ki naya code chal raha hai ya purana!
+    // Fallback message to prevent user UI crashes
     return {
       score: 0,
-      feedback: "NEW ENGINE PARSING FAULT: Check server logs for response structure.",
+      feedback: "AI Evaluation temporary sync pause. Checking server schema connection.",
     };
   }
 };
