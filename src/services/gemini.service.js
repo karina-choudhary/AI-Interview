@@ -3,7 +3,7 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 const evaluateAnswer = async (question, userAnswer, correctAnswer) => {
   try {
-    // Clean Prompt: System instructions and examples are removed to prevent schema conflicts
+    // Prompt ko simple rakha hai, guidelines ke mutabik JSON format ka description nahi dena hai
     const prompt = `You are an expert tech interviewer AI. 
 Evaluate the candidate's answer based on the provided reference solution.
 
@@ -16,16 +16,16 @@ Reference Answer: ${correctAnswer}`;
       contents: prompt,
       config: {
         responseMimeType: "application/json",
-        // Force the model engine to strictly conform to your payload properties
+        // Enforcing standard lower-case JSON validation layout strings
         responseSchema: {
-          type: "OBJECT",
+          type: "object",
           properties: {
             score: { 
-              type: "INTEGER", 
+              type: "integer", 
               description: "Technical assessment score between 0 and 100." 
             },
             feedback: { 
-              type: "STRING", 
+              type: "string", 
               description: "Dynamic, concise technical evaluation and areas of improvement." 
             }
           },
@@ -48,8 +48,7 @@ Reference Answer: ${correctAnswer}`;
       throw new Error("Gemini returned empty response.");
     }
 
-    // Since the API enforces configuration at the engine level,
-    // the system natively passes clean raw string structures.
+    // Engine clean schema response parse framework
     const parsedData = JSON.parse(text.trim());
 
     return {
@@ -61,9 +60,10 @@ Reference Answer: ${correctAnswer}`;
     console.error("========== GEMINI INTEGRATION FAULT ==========");
     console.error(error);
     
+    // Yahan humne message badal diya hai taaki aapko pata chale ki naya code chal raha hai ya purana!
     return {
       score: 0,
-      feedback: "AI evaluation failed due to parsing setup. Please review manually.",
+      feedback: "NEW ENGINE PARSING FAULT: Check server logs for response structure.",
     };
   }
 };
