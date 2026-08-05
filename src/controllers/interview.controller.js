@@ -3,154 +3,193 @@ const Interview = require("../models/interview.model");
 const Question = require("../models/question.model");
 const asyncWrapper = require("../utils/asyncWrapper");
 
+// ==========================
 // Start Interview
+// ==========================
 const startInterview = asyncWrapper(async (req, res) => {
-    const { difficulty } = req.body;
+  const { difficulty } = req.body;
 
-    if (!difficulty) {
-        return res.status(400).json({ message: "Difficulty is required." });
-    }
+  if (!difficulty) {
+    return res.status(400).json({ message: "Difficulty is required." });
+  }
 
-    // Format: "easy" -> "Easy"
-    const formattedDifficulty =
-        difficulty.charAt(0).toUpperCase() +
-        difficulty.slice(1).toLowerCase();
+  const formattedDifficulty =
+    difficulty.charAt(0).toUpperCase() + difficulty.slice(1).toLowerCase();
 
-    // Fetch 5 random questions based on difficulty
-    const questions = await Question.aggregate([
-        { $match: { difficulty: formattedDifficulty } },
-        { $sample: { size: 5 } },
-    ]);
+  const questions = await Question.aggregate([
+    { $match: { difficulty: formattedDifficulty } },
+    { $sample: { size: 5 } },
+  ]);
 
-    if (questions.length === 0) {
-        return res.status(404).json({
-            message: "No questions found for the selected difficulty.",
-        });
-    }
+  if (questions.length === 0) {
+    return res.status(404).json({ message: "No questions found" });
+  }
 
-    // Create Interview Document
-    const interview = await Interview.create({
-        user: req.user.id,
-        questions: questions.map((q) => q._id),
-        answers: [],
-        score: 0,
-        status: "started",
-    });
+  const interview = await Interview.create({
+    user: req.user.id,
+    questions: questions.map((q) => q._id),
+    answers: [],
+    score: 0,
+    status: "started",
+  });
 
-    res.status(201).json({
-        message: "Interview started successfully",
-        interview,
-    });
+  res.status(201).json({
+    message: "Interview started successfully",
+    interview,
+  });
 });
 
-// Get Interview By ID
+// ==========================
+// Get Interview
+// ==========================
 const getInterviewById = asyncWrapper(async (req, res) => {
-    const interview = await Interview.findById(req.params.id)
-        .populate("questions")
-        .populate("answers.questionId");
+  const interview = await Interview.findById(req.params.id)
+    .populate("questions")
+    .populate("answers.questionId");
 
-    if (!interview) {
-        return res.status(404).json({ message: "Interview not found" });
-    }
+  if (!interview) {
+    return res.status(404).json({ message: "Interview not found" });
+  }
 
-    res.status(200).json({ interview });
+  res.status(200).json({ interview });
 });
 
+// ==========================
 // Submit Answer
+// ==========================
 const submitAnswer = asyncWrapper(async (req, res) => {
-    const { id } = req.params;
-    const { questionId, answer } = req.body;
+  const { id } = req.params;
+  const { questionId, answer } = req.body;
 
-    const interview = await Interview.findById(id);
-    if (!interview) {
-        return res.status(404).json({ message: "Interview not found" });
-    }
-
-    const question = await Question.findById(questionId);
-    if (!question) {
-        return res.status(404).json({ message: "Question not found" });
-    }
-
-    // AI Evaluation Service
-    const aiResult = await evaluateAnswer(
-        question.question,
-        answer,
-        question.answer
-    );
-
-    // Push new answer mapping
-    interview.answers.push({
-        questionId,
-        answer,
-        score: aiResult.score,
-        feedback: aiResult.feedback,
+  // 1. Check Empty Answer
+  if (!answer || !answer.trim()) {
+    return res.status(400).json({
+      message: "Answer text cannot be blank.",
     });
+  }
 
-    // Calculate Overall Dynamic Score
-    const totalScore = interview.answers.reduce(
-        (sum, item) => sum + (item.score || 0),
-        0
-    );
+  const interview = await Interview.findById(id);
+  if (!interview) {
+    return res.status(404).json({ message: "Interview not found" });
+  }
 
-    interview.score = Math.round(totalScore / interview.answers.length);
-
-    // Check Completion Status
-    if (interview.answers.length === interview.questions.length) {
-        interview.status = "completed";
-    }
-
-    await interview.save();
-
-    res.status(200).json({
-        message: interview.status === "completed"
-            ? "Interview completed successfully"
-            : "Answer submitted successfully",
-        interview,
+  // 2. Already completed check
+  if (interview.status === "completed") {
+    return res.status(400).json({
+      message: "Interview is already completed and submitted.",
     });
+  }
+
+  // Validate question belongs to this interview
+  const validQuestion = interview.questions.some(
+    (item) => item.toString() === questionId
+  );
+  if (!validQuestion) {
+    return res.status(400).json({ message: "Invalid Question" });
+  }
+
+  // Duplicate Answer Check
+  const alreadyAnswered = interview.answers.find(
+    (item) => item.questionId.toString() === questionId
+  );
+  if (alreadyAnswered) {
+    return res.status(400).json({ message: "Question already answered" });
+  }
+
+  const question = await Question.findById(questionId);
+  if (!question) {
+    return res.status(404).json({ message: "Question not found" });
+  }
+
+  // Call Gemini Service
+  const aiResult = await evaluateAnswer(
+    question.question,
+    answer,
+    question.answer
+  );
+
+  interview.answers.push({
+    questionId,
+    answer,
+    score: aiResult.score || 0,
+    feedback: aiResult.feedback || "No feedback provided",
+  });
+
+  // Calculate Running Average Score
+  const totalScore = interview.answers.reduce(
+    (sum, item) => sum + (item.score || 0),
+    0
+  );
+  interview.score = Math.round(totalScore / interview.answers.length);
+
+  // Auto-complete status check
+  if (interview.answers.length >= interview.questions.length) {
+    interview.status = "completed";
+  }
+
+  await interview.save();
+
+  res.status(200).json({
+    message:
+      interview.status === "completed"
+        ? "Interview completed successfully"
+        : "Answer submitted successfully",
+    interview,
+  });
 });
 
-// Get Interview History
+// ==========================
+// Interview History
+// ==========================
 const getInterviewHistory = asyncWrapper(async (req, res) => {
-    const interviews = await Interview.find({ user: req.user.id })
-        .populate("questions")
-        .sort({ createdAt: -1 });
+  const interviews = await Interview.find({ user: req.user.id })
+    .populate("questions")
+    .sort({ createdAt: -1 });
 
-    res.status(200).json({
-        message: "Interview history fetched successfully",
-        interviews,
-    });
+  res.status(200).json({
+    message: "Interview history fetched successfully",
+    interviews,
+  });
 });
 
-// Get Dashboard Stats
+// ==========================
+// Dashboard Stats
+// ==========================
 const getDashboardStats = asyncWrapper(async (req, res) => {
-    const interviews = await Interview.find({ user: req.user.id });
+  const interviews = await Interview.find({ user: req.user.id });
+  const totalInterviews = interviews.length;
 
-    const totalInterviews = interviews.length;
-
-    const completedInterviews = interviews.filter(
-        (item) => item.status === "completed"
-    ).length;
-
-    const averageScore = totalInterviews > 0
-        ? Math.round(interviews.reduce((sum, item) => sum + (item.score || 0), 0) / totalInterviews)
-        : 0;
-
-    const bestScore = totalInterviews > 0
-        ? Math.max(...interviews.map((item) => item.score || 0))
-        : 0;
-
-    res.status(200).json({
-        totalInterviews,
-        completedInterviews,
-        averageScore,
-        bestScore,
+  if (totalInterviews === 0) {
+    return res.status(200).json({
+      totalInterviews: 0,
+      completedInterviews: 0,
+      averageScore: 0,
+      bestScore: 0,
     });
+  }
+
+  const completedInterviews = interviews.filter(
+    (item) => item.status === "completed"
+  ).length;
+
+  const averageScore = Math.round(
+    interviews.reduce((sum, item) => sum + (item.score || 0), 0) / totalInterviews
+  );
+
+  const bestScore = Math.max(...interviews.map((item) => item.score || 0));
+
+  res.status(200).json({
+    totalInterviews,
+    completedInterviews,
+    averageScore,
+    bestScore,
+  });
 });
 
 module.exports = {
-    startInterview,
-    getInterviewById,
-    submitAnswer,
-    getInterviewHistory,
-    getDashboardStats,
+  startInterview,
+  getInterviewById,
+  submitAnswer,
+  getInterviewHistory,
+  getDashboardStats,
 };
