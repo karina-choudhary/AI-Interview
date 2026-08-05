@@ -15,11 +15,14 @@ function Dashboard() {
 });
 const fetchDashboardStats = async () => {
   try {
+    const token = localStorage.getItem("token");
+
+console.log("Dashboard Token:", token);
     const response = await axios.get(
       "https://ai-interview-a2kn.onrender.com/api/interview/dashboard-stats",
       {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${token}`,
         },
       }
     );

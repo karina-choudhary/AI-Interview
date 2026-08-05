@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-// import "./Login.css";
+
 const API_URL = import.meta.env.VITE_API_URL;
 
 const Login = () => {
@@ -28,7 +28,9 @@ const Login = () => {
     setMessage("");
 
     try {
-      const res = await fetch(`${API_URL}/api/auth/login`,  {
+      console.log("API URL:", API_URL);
+
+      const res = await fetch(`${API_URL}/api/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -37,11 +39,14 @@ const Login = () => {
       });
 
       const data = await res.json();
-          console.log("Response:", data);
-          console.log("Status:", res.status);
+
+      console.log("Response Data:", data);
+      console.log("Status:", res.status);
+      console.log("Token From API:", data.token);
 
       if (res.ok) {
         localStorage.setItem("token", data.token);
+        console.log("Saved Token:", localStorage.getItem("token"));
 
         setMessage("✅ Login Successful");
 
@@ -52,6 +57,7 @@ const Login = () => {
         setMessage(data.message || data.error || "Login Failed");
       }
     } catch (error) {
+      console.log(error);
       setMessage("Server Error");
     }
 
