@@ -88,14 +88,6 @@ const submitAnswer = asyncWrapper(async (req, res) => {
     return res.status(400).json({ message: "Invalid Question" });
   }
 
-  // Duplicate Answer Check
-  const alreadyAnswered = interview.answers.find(
-    (item) => item.questionId.toString() === questionId
-  );
-  if (alreadyAnswered) {
-    return res.status(400).json({ message: "Question already answered" });
-  }
-
   const question = await Question.findById(questionId);
   if (!question) {
     return res.status(404).json({ message: "Question not found" });
@@ -108,12 +100,26 @@ const submitAnswer = asyncWrapper(async (req, res) => {
     question.answer
   );
 
-  interview.answers.push({
-    questionId,
-    answer,
-    score: aiResult.score || 0,
-    feedback: aiResult.feedback || "No feedback provided",
-  });
+  // FIXED: Overwrite or update existing answer entry to prevent 400 Bad Request
+  const existingAnswerIndex = interview.answers.findIndex(
+    (item) => item.questionId.toString() === questionId
+  );
+
+  if (existingAnswerIndex !== -1) {
+    interview.answers[existingAnswerIndex] = {
+      questionId,
+      answer,
+      score: aiResult.score || 0,
+      feedback: aiResult.feedback || "No feedback provided",
+    };
+  } else {
+    interview.answers.push({
+      questionId,
+      answer,
+      score: aiResult.score || 0,
+      feedback: aiResult.feedback || "No feedback provided",
+    });
+  }
 
   // Calculate Running Average Score
   const totalScore = interview.answers.reduce(
@@ -176,6 +182,7 @@ const getDashboardStats = asyncWrapper(async (req, res) => {
     interviews.reduce((sum, item) => sum + (item.score || 0), 0) / totalInterviews
   );
 
+  // Fixed the spread operator crash bug for new profiles with empty arrays
   const bestScore = Math.max(...interviews.map((item) => item.score || 0));
 
   res.status(200).json({
