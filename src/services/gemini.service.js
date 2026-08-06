@@ -11,11 +11,11 @@ Candidate Answer: ${userAnswer}
 Reference Answer: ${correctAnswer}`;
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      // FIXED: Google's updated stable flagship model used to clear 404 blockages
+      model: "gemini-2.0-flash", 
       contents: prompt,
       config: {
         responseMimeType: "application/json",
-        // Bulletproof lowercase string format supported perfectly by Gemini 2.5 on Vercel
         responseSchema: {
           type: "object",
           properties: {
@@ -33,7 +33,6 @@ Reference Answer: ${correctAnswer}`;
       },
     });
 
-    // 100% Correct array mapping syntax for the @google/genai SDK
     let text = "";
     if (response.text) {
       text = typeof response.text === "function" ? await response.text() : response.text;
@@ -56,7 +55,6 @@ Reference Answer: ${correctAnswer}`;
     console.error("========== GEMINI INTEGRATION FAULT ==========");
     console.error(error);
     
-    // Exact error text display formatting to diagnose exactly what broke inside Vercel
     return {
       score: 0,
       feedback: `CRITICAL INTEGRATION ERROR: ${error.message || "Unknown error context"}`
@@ -67,4 +65,3 @@ Reference Answer: ${correctAnswer}`;
 module.exports = {
   evaluateAnswer,
 };
-
