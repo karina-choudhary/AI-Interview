@@ -1,6 +1,12 @@
 const { GoogleGenAI } = require('@google/genai');
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
+// Utility Helper: Request throttle mechanism to prevent 429 RPM spikes
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * Individual Evaluation Handler
+ */
 const evaluateAnswer = async (question, userAnswer, correctAnswer) => {
   try {
     const prompt = `You are an expert tech interviewer AI. 
@@ -11,7 +17,6 @@ Candidate Answer: ${userAnswer}
 Reference Answer: ${correctAnswer}`;
 
     const response = await ai.models.generateContent({
-      // FIXED: Google's updated stable flagship model used to clear 404 blockages
       model: "gemini-2.0-flash", 
       contents: prompt,
       config: {
@@ -44,24 +49,69 @@ Reference Answer: ${correctAnswer}`;
       throw new Error("Gemini returned empty response payload.");
     }
 
-    const parsedData = JSON.parse(text.trim());
-
-    return {
-      score: typeof parsedData.score === "number" ? parsedData.score : Number(parsedData.score) || 0,
-      feedback: parsedData.feedback ? String(parsedData.feedback).trim() : "No feedback returned by AI.",
-    };
+    return JSON.parse(text.trim());
 
   } catch (error) {
-    console.error("========== GEMINI INTEGRATION FAULT ==========");
+    console.error("========== SINGLE ITEM EVALUATION ERROR ==========");
     console.error(error);
-    
+    // Safe item fallback boundary container
     return {
       score: 0,
-      feedback: `CRITICAL INTEGRATION ERROR: ${error.message || "Unknown error context"}`
+      feedback: `Item evaluation failed: ${error.message || "Unknown context"}`
     };
   }
 };
 
+/**
+ * Main Controller Loop: Processes array of questions sequentially
+ * Pass your array of answers/questions here from the request body.
+ */
+const processFullInterview = async (questionsArray) => {
+  const finalReport = [];
+  let aggregateScore = 0;
+
+  console.log(`Starting interview batch processing. Total Items: ${questionsArray.length}`);
+
+  for (let i = 0; i < questionsArray.length; i++) {
+    const item = questionsArray[i];
+    console.log(`Evaluating Question ${i + 1}/${questionsArray.length}...`);
+
+    // Execute engine execution cycle securely
+    const evaluation = await evaluateAnswer(
+      item.question || item.questionText,
+      item.userAnswer || item.candidateAnswer,
+      item.correctAnswer || item.referenceAnswer
+    );
+
+    // Append response schema payload data details
+    finalReport.push({
+      question: item.question || item.questionText,
+      userAnswer: item.userAnswer || item.candidateAnswer,
+      correctAnswer: item.correctAnswer || item.referenceAnswer,
+      score: evaluation.score,
+      feedback: evaluation.feedback
+    });
+
+    aggregateScore += evaluation.score;
+
+    // Strict Enforcement: Add a 2-second pause between item loops 
+    // to strictly respect Gemini Free Tier per-minute thresholds
+    if (i < questionsArray.length - 1) {
+      console.log("Throttling active: Waiting 2000ms for next item call...");
+      await delay(2000);
+    }
+  }
+
+  const overallScore = Math.round(aggregateScore / questionsArray.length);
+
+  return {
+    overallScore,
+    totalQuestions: questionsArray.length,
+    report: finalReport
+  };
+};
+
 module.exports = {
   evaluateAnswer,
+  processFullInterview
 };
