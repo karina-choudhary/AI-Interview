@@ -21,33 +21,25 @@ const Login = () => {
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (e, demoData = null) => {
+    if (e) e.preventDefault();
 
     setLoading(true);
     setMessage("");
 
     try {
-      console.log("API URL:", API_URL);
-
       const res = await fetch(`${API_URL}/api/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(demoData || formData),
       });
 
       const data = await res.json();
 
-      console.log("Response Data:", data);
-      console.log("Status:", res.status);
-      console.log("Token From API:", data.token);
-
       if (res.ok) {
         localStorage.setItem("token", data.token);
-        console.log("Saved Token:", localStorage.getItem("token"));
-
         setMessage("✅ Login Successful");
 
         setTimeout(() => {
@@ -92,6 +84,13 @@ const Login = () => {
 
           <button type="submit">
             {loading ? "Please Wait..." : "Login"}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleSubmit(null, { email: "demo@gmail.com", password: "demo1234" })}
+          >
+            Guest Login
           </button>
         </form>
 
